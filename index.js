@@ -1,7 +1,11 @@
+// external import
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+
+// internal import
+const userRoute = require("./routes/user");
 
 
 dotenv.config();
@@ -16,6 +20,7 @@ mongoose
 
 app.use(express.json());
 
+app.use("/api/users", userRoute);
 
 app.listen(process.env.PORT || 3000, () => {
   console.log("Backend server is running!");
