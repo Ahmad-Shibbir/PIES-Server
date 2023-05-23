@@ -1,68 +1,70 @@
-const router = require("express").Router();
-const User = require("../models/User");
-const CryptoJS = require("crypto-js");
-const jwt = require("jsonwebtoken");
+const Cart = require("../models/Cart");
+const {
+  verifyToken,
+  verifyTokenAndAuthorization,
+  verifyTokenAndAdmin,
+} = require("./verifyToken");
 
-//REGISTER
-router.post("/register", async (req, res) => {
-  const newUser = new User({
-    username: req.body.username,
-    email: req.body.email,
-    password: CryptoJS.AES.encrypt(
-      req.body.password,
-      process.env.PASS_SEC
-    ).toString(),
-  });
+const router = require("express").Router();
+
+//CREATE
+
+router.post("/", verifyToken, async (req, res) => {
+  const newCart = new Cart(req.body);
 
   try {
-    const savedUser = await newUser.save();
-    res.status(201).json(savedUser);
+    const savedCart = await newCart.save();
+    res.status(200).json(savedCart);
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
-//LOGIN
+//UPDATE
+router.put("/:id", verifyTokenAndAuthorization, async (req, res) => {
+  try {
+    const updatedCart = await Cart.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: req.body,
+      },
+      { new: true }
+    );
+    res.status(200).json(updatedCart);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 
-router.post('/login', async (req, res) => {
-    try{
-        const user = await User.findOne(
-            {
-                userName: req.body.user_name
-            }
-        );
+//DELETE
+router.delete("/:id", verifyTokenAndAuthorization, async (req, res) => {
+  try {
+    await Cart.findByIdAndDelete(req.params.id);
+    res.status(200).json("Cart has been deleted...");
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 
-        !user && res.status(401).json("Wrong User Name");
+//GET USER CART
+router.get("/find/:userId", verifyTokenAndAuthorization, async (req, res) => {
+  try {
+    const cart = await Cart.findOne({ userId: req.params.userId });
+    res.status(200).json(cart);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 
-        const hashedPassword = CryptoJS.AES.decrypt(
-            user.password,
-            process.env.PASS_SEC
-        );
+// //GET ALL
 
-
-        const originalPassword = hashedPassword.toString(CryptoJS.enc.Utf8);
-
-        const inputPassword = req.body.password;
-        
-        originalPassword != inputPassword && 
-            res.status(401).json("Wrong Password");
-
-        const accessToken = jwt.sign(
-        {
-            id: user._id,
-            isAdmin: user.isAdmin,
-        },
-        process.env.JWT_SEC,
-            {expiresIn:"3d"}
-        );
-  
-        const { password, ...others } = user._doc;  
-        res.status(200).json({...others, accessToken});
-
-    }catch(err){
-        res.status(500).json(err);
-    }
-
+router.get("/", verifyTokenAndAdmin, async (req, res) => {
+  try {
+    const carts = await Cart.find();
+    res.status(200).json(carts);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 module.exports = router;
