@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
+// Define the item schema
 const itemSchema = new mongoose.Schema({
-  name: {
+  itemName: {
     type: String,
     required: true
   },
@@ -9,15 +10,22 @@ const itemSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  borrowCount: {
-    type: Number,
-    default: 0
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
-  borrowed: {
+  itemType: {
+    type: String,
+    enum: ['home appliances', 'food', 'book'],
+    required: true
+  },
+  availability: {
     type: Boolean,
-    default: false
-  },
- 
+    default: true
+  }
 });
 
+// Create and export the Item model
 module.exports = mongoose.model('Item', itemSchema);
+
