@@ -179,4 +179,53 @@ router.delete('/items/:id', verifyToken, async (req, res) => {
 //   }
 // });
 
+
+// *************************
+// USER Search and Filter
+// *************************
+
+// Search items
+// Search items
+router.get('/item/search', async (req, res) => {
+    try {
+      const { query } = req.query;
+  
+      // Search for items matching the query
+      const items = await Item.find({
+        $or: [
+          { itemName: { $regex: query, $options: 'i' } },
+          { description: { $regex: query, $options: 'i' } }
+        ]
+      });
+        
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to search items' });
+    }
+  });
+  
+  // Filter items
+  router.get('/item/filter', async (req, res) => {
+    try {
+      const { itemType, availability } = req.query;
+  
+      // Create a filter object based on the provided criteria
+      const filter = {};
+      if (itemType) {
+        filter.itemType = itemType;
+      }
+      if (availability) {
+        filter.availability = availability === 'true';
+      }
+  
+      // Find items matching the filter
+      const items = await Item.find(filter);
+  
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to filter items' });
+    }
+  });
+  
+
 module.exports = router;
