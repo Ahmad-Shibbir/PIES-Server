@@ -121,7 +121,6 @@ router.post("/togglecomplain/:id", async (req, res) => {
 
 
 //GET USER STATS
-
 router.get("/stats", verifyTokenAndAdmin, async (req, res) => {
   const date = new Date();
   const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
@@ -146,5 +145,55 @@ router.get("/stats", verifyTokenAndAdmin, async (req, res) => {
     res.status(500).json(err);
   }
 });
+
+
+
+// *************************
+// USER Search and Filter
+// *************************
+
+// Search users
+router.get('/search',  async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    // Search for users matching the query
+    const users = await User.find({
+      $or: [
+        { username: { $regex: query, $options: 'i' } },
+        { email: { $regex: query, $options: 'i' } }
+      ]
+    });
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to search users' });
+  }
+});
+
+// Filter users
+router.get('/filter',  async (req, res) => {
+  try {
+    const { username, email } = req.query;
+
+    // Create a filter object based on the provided criteria
+    const filter = {};
+    if (username) {
+      filter.username = { $regex: username, $options: 'i' };
+    }
+    if (email) {
+      filter.email = { $regex: email, $options: 'i' };
+    }
+
+    // Find users matching the filter
+    const users = await User.find(filter);
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to filter users' });
+  }
+});
+
+
 
 module.exports = router;
