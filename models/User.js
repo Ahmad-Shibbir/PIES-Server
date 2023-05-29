@@ -24,6 +24,15 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isComplained: 
+    {
+      type: Boolean,
+      default: false,
+    },
+    currency: {
+      type: Number,
+      default: 500
+    },
   },
   { timestamps: true }
 );

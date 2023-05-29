@@ -52,7 +52,8 @@ router.get("/find/:id", verifyTokenAndAdmin, async (req, res) => {
 });
 
 //GET ALL USER
-router.get("/", verifyTokenAndAdmin, async (req, res) => {
+//verifyTokenAndAdmin,
+router.get("/",  async (req, res) => {
   const query = req.query.new;
   try {
     const users = query
@@ -63,6 +64,61 @@ router.get("/", verifyTokenAndAdmin, async (req, res) => {
     res.status(500).json(err);
   }
 });
+
+
+
+// *************************
+// USER COMPLAIN SECTION
+// *************************
+
+
+//GET ALL complained USER
+//verifyTokenAndAdmin,
+router.get("/complained", async (req, res) => {
+  try {
+    const users = await User.find({ isComplained: true });
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+//ADD COMPLAIN to user
+router.post("/addcomplain/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    user.isComplained = true;
+    await user.save();
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+//REMOVE COMPLAIN to user
+router.post("/removecomplain/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    user.isComplained = false;
+    await user.save();
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+//TOGGLE COMPLAIN to user (if true make false and vice versa )
+router.post("/togglecomplain/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    user.isComplained = !user.isComplained;
+    await user.save();
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 
 //GET USER STATS
 
