@@ -1,15 +1,41 @@
 const mongoose = require('mongoose');
 
 const borrowSchema = new mongoose.Schema({
+  itemName: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  
+  itemId: {
+    type: mongoose.Schema.Types.ObjectId,
+    // ref: 'User',
+    required: true
+    // type: String,
+    // required: true
+  },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    // ref: 'User',
+    required: true
+  },
   borrower: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  item: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Item',
+  itemImg:{
+    type: String,
     required: true
+  },
+  itemStat:{
+    type: String,
+    enum: ['available', 'requested', 'borrowed', 'item back'],
+    required: true,
+    // default: 'available'
   },
   borrowedAt: {
     type: Date,
